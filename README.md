@@ -39,9 +39,10 @@ Host bastion
 Host someinternalhost
     Hostname 10.132.0.3
     ProxyCommand ssh -W %h:%p bastion
-- Установил VPN сервер Pritunl (пока ещё нет)
+- Установил VPN сервер Pritunl
 - Настроил SSL (пока ещё нет)
 
-## Как проверить работоспособность
+## Как проверить работоспособность (переписать) 
 
-
+bastion_IP = 35.210.197.114
+someinternalhost_IP = 10.132.0.3
