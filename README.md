@@ -1,10 +1,11 @@
 
+
 # mtyamakov_infra
 mtyamakov Infra repository
 
 ## Список работ
-- [Homework 3 - ChatOPS](#Homework-3)
-- [Homework 4 - Bastion Host](#Homework-4)
+- [Homework 3 - ChatOPS](#homework-3-chatops)
+- [Homework 4 - Bastion Host](#homework-4-bastion-host)
 - ---
 
 ## Homework-3: ChatOPS
@@ -18,7 +19,7 @@ mtyamakov Infra repository
 - Сделать commit в репозитории.
 
 #### Как проверить работоспособность:
-- Перейти во вкладку [Build History](https://travis-ci.com/Otus-DevOps-2019-08/mtyamakov_infra/builds?utm_medium=notification&utm_source=slack "Build History") и убедиться, что билд выполнен без ошибок.
+- Перейти во вкладку [Build History](https://travis-ci.com/Otus-DevOps-2019-08/mtyamakov_infra/builds "Build History") и убедиться, что билд выполнен без ошибок.
 ---
 ## Homework-4: Bastion Host
 
@@ -53,11 +54,11 @@ ProxyCommand ssh -W %h:%p bastion
 ssh bastion - подключение к bastion (35.210.197.114)
 ssh someinternalhost - подключение к someinternalhost (10.132.0.3)
 ```
-- Установил VPN сервер Pritunl
-- Подключил SSL-сертификат с помощью sslip.io и Let's Encrypt
+- Установил VPN сервер Pritunl;
+- Подключил SSL-сертификат с помощью sslip.io и Let's Encrypt;
 
 #### Как проверить работоспособность:
-- Перейти во вкладку [Build History](https:// "Build History") и убедиться, что билд выполнен без ошибок.
+- Перейти во вкладку [Build History](https://travis-ci.com/Otus-DevOps-2019-08/mtyamakov_infra/builds "Build History") и убедиться, что билд выполнен без ошибок.
 - Проверить валидность SSL-сертификата можно командой:
 ```
 curl -v https://35.210.197.114.sslip.io >/dev/null 2>&1 && echo "SSL check - ok" || echo "SSL check - not ok"
