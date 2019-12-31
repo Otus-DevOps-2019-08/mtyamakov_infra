@@ -67,3 +67,11 @@ SSL check - ok
 #### Travis CI variables:
 bastion_IP = 35.210.197.114  
 someinternalhost_IP = 10.132.0.3
+
+---
+## Homework-5: Cloud App
+
+#### Travis CI variables:
+testapp_IP = 35.205.37.24
+testapp_port = 9292
+
