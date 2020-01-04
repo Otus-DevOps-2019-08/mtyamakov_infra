@@ -1,0 +1,34 @@
+{ 
+    "variables": {
+            "machine_type": "f1-micro",
+            "disk_size": "10",
+            "disk_type": "pd-standard",
+            "network": "default",
+            "tags": "puma-server",
+            "image_description": "Base image with pre-installed Ruby, MongoDB and Reddit application"
+    },
+    "builders": [
+        {
+            "type": "googlecompute",
+            "image_description": "{{ user `image_description` }}",
+            "project_id": "{{ user `project_id` }}",
+            "image_name": "reddit-full-{{ timestamp }}",
+            "image_family": "reddit-full",
+            "source_image_family": "{{ user `source_image_family` }}",
+            "zone": "europe-west1-b",
+            "ssh_username": "m.tyamakov",
+            "machine_type": "{{ user `machine_type` }}",
+            "disk_size": "{{ user `disk_size` }}",
+            "disk_type": "{{ user `disk_type` }}",
+            "network": "{{ user `network` }}",
+            "tags": "{{ user `tags` }}"
+        }
+    ],
+    "provisioners": [
+                {
+            "type": "shell",
+            "script": "scripts/deploy.sh",
+            "execute_command": "sudo {{ .Path }}"
+        }
+    ]
+}
