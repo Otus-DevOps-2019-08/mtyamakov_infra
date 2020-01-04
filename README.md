@@ -153,3 +153,160 @@ gcloud compute firewall-rules create default-puma-server \
 testapp_IP = 35.205.37.24
 testapp_port = 9292
 
+---
+## Homework-6: Packer 
+#### В процессе сделал:
+- Создал базовый образ **reddit-base** c использованием шаблона **ubuntu16.json** и файла с переменными **variables.json**
+
+*Созданный образ в gcloud:*
+```
+$ gcloud compute images list --no-standard-images
+NAME                    PROJECT         FAMILY       DEPRECATED  STATUS
+reddit-base-1578098155  infra-otus0777  reddit-base              READY
+```
+
+*Содержимое шаблона **ubuntu16.json**:*
+```
+$ cat ubuntu16.json 
+{ 
+    "variables": {
+            "machine_type": "f1-micro",
+            "disk_size": "10",
+            "disk_type": "pd-standard",
+            "network": "default",
+            "tags": "puma-server",
+            "image_description": "Base image with pre-installed Ruby and MongoDB"
+    },
+    "builders": [
+        {
+            "type": "googlecompute",
+            "image_description": "{{ user `image_description` }}",
+            "project_id": "{{ user `project_id` }}",
+            "image_name": "reddit-base-{{ timestamp }}",
+            "image_family": "reddit-base",
+            "source_image_family": "{{ user `source_image_family` }}",
+            "zone": "europe-west1-b",
+            "ssh_username": "m.tyamakov",
+            "machine_type": "{{ user `machine_type` }}",
+            "disk_size": "{{ user `disk_size` }}",
+            "disk_type": "{{ user `disk_type` }}",
+            "network": "{{ user `network` }}",
+            "tags": "{{ user `tags` }}"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "script": "scripts/install_ruby.sh",
+            "execute_command": "sudo {{ .Path }}"
+        },
+        {
+            "type": "shell",
+            "script": "scripts/install_mongodb.sh",
+            "execute_command": "sudo {{ .Path }}"
+        }
+    ]
+}
+```
+
+*Пример содержимого файла **variables.json** (показано содержимое файла **variables.json.example**):*
+```
+{
+  "project_id": "infra-999999",
+  "source_image_family": "ubuntu-1604-lts"
+}
+```
+*Перед созданием образа можно проверить его командой*:
+```
+packer validate -var-file=variables.json ubuntu16.json
+Template validated successfully.
+```
+- Создал bake-образ **reddit-full** c использованием шаблона **immutable.json**. В качестве базового образа использовал ранее созданный **reddit-base**
+
+*Созданный образ в gcloud:*
+```
+gcloud compute images list --no-standard-images
+NAME                    PROJECT         FAMILY       DEPRECATED  STATUS
+reddit-base-1578098155  infra-otus0777  reddit-base              READY
+reddit-full-1578103912  infra-otus0777  reddit-full              READY
+```
+
+*Содержимое файла immutable.json*:
+```
+$ cat immutable.json 
+{ 
+    "variables": {
+            "machine_type": "f1-micro",
+            "disk_size": "10",
+            "disk_type": "pd-standard",
+            "network": "default",
+            "tags": "puma-server",
+            "image_description": "Base image with pre-installed Ruby, MongoDB and Reddit application"
+    },
+    "builders": [
+        {
+            "type": "googlecompute",
+            "image_description": "{{ user `image_description` }}",
+            "project_id": "{{ user `project_id` }}",
+            "image_name": "reddit-full-{{ timestamp }}",
+            "image_family": "reddit-full",
+            "source_image_family": "{{ user `source_image_family` }}",
+            "zone": "europe-west1-b",
+            "ssh_username": "m.tyamakov",
+            "machine_type": "{{ user `machine_type` }}",
+            "disk_size": "{{ user `disk_size` }}",
+            "disk_type": "{{ user `disk_type` }}",
+            "network": "{{ user `network` }}",
+            "tags": "{{ user `tags` }}"
+        }
+    ],
+    "provisioners": [
+                {
+            "type": "shell",
+            "script": "scripts/deploy.sh",
+            "execute_command": "sudo {{ .Path }}"
+        }
+    ]
+}
+```
+
+*Для старта приложения при запуске инстанса используется bash-скрипт **scripts/deploy.sh**:*
+```
+#!/bin/bash
+git clone -b monolith https://github.com/express42/reddit.git
+cd reddit && bundle install
+#Add systemd unit 
+tee /lib/systemd/system/reddit-app.service << EOF
+[Unit]
+Description=Reddit Application Service
+
+[Service]
+WorkingDirectory=/home/m.tyamakov/reddit
+ExecStart=/usr/local/bin/puma
+Restart=always
+RestartSec=10
+SyslogIdentifier=reddit-app
+
+[Install]
+WantedBy=multi-user.target
+EOF
+#Start application
+systemctl enable reddit-app
+systemctl start reddit-app
+```
+- Для запуска инстанса из консоли создал bash-скрипт **create-reddit-vm.sh**:
+```
+#!/usr/bin/bash
+gcloud compute instances create reddit-app \
+--boot-disk-size=10GB \
+--image-family=reddit-full \
+--image-project=infra-otus0777 \
+--machine-type=f1-micro \
+--tags=puma-server \
+--restart-on-failure
+```
+####  Как проверить работоспособность:
+- Выполнить скрипт **create-reddit-vm.sh**, после создания инстанса перейти по адресу [http://external-ip:9292](http:///external-ip:9292/) и убедиться, что страница открывается;
+- Перейти во вкладку [Build History](https://travis-ci.com/Otus-DevOps-2019-08/mtyamakov_infra/builds "Build History") и убедиться, что билд выполнен без ошибок.
+
+---
