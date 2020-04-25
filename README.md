@@ -7,6 +7,7 @@ mtyamakov Infra repository
 - [Homework 3 - ChatOPS](#homework-3-chatops)
 - [Homework 4 - Bastion Host](#homework-4-bastion-host)
 - [Homework 5 - cloud, test application](#homework-5-gcloud)
+- [Homework 6 - Packer](#homework-6-packer)
 - ---
 
 ## Homework-3: ChatOPS
