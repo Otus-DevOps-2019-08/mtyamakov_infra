@@ -1,13 +1,13 @@
 terraform {
-  # Версия terraform
+  # terraform version
   required_version = "0.12.8"
 }
 
 provider "google" {
-  # Версия провайдера
+  # provider version
   version = "2.15"
 
-  # ID проекта
+  # Project ID
   project = var.project
 
   region = var.region
@@ -29,8 +29,9 @@ resource "google_compute_instance" "app" {
   }
 
   metadata = {
-    # Путь до публичного ключа
+    # Path to public key
     ssh-keys = "appuser:${file(var.public_key_path)}"
+
   }
 
   connection {
@@ -38,7 +39,7 @@ resource "google_compute_instance" "app" {
     host  = self.network_interface[0].access_config[0].nat_ip
     user  = "appuser"
     agent = false
-    # путь до приватного ключа
+    # Path to private key
     private_key = file(var.private_key_path)
   }
 
@@ -55,15 +56,15 @@ resource "google_compute_instance" "app" {
 
 resource "google_compute_firewall" "firewall_puma" {
   name = "allow-puma-default"
-  # Название сети, в которой действует правило
+  # Network name
   network = "default"
-  # Какой доступ разрешить
+  # Allow rule
   allow {
     protocol = "tcp"
     ports    = ["9292"]
   }
-  # Каким адресам разрешаем доступ
+  # Which addresses have access
   source_ranges = ["0.0.0.0/0"]
-  # Правило применимо для инстансов с перечисленными тэгами
+  # Targets for rule
   target_tags = ["reddit-app"]
 }
